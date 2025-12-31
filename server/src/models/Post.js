@@ -47,3 +47,5 @@ const postSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Post", postSchema);
+postSchema.index({ user: 1, createdAt: -1 });
+

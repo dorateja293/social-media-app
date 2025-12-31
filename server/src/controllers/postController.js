@@ -1,15 +1,18 @@
 import Post from "../models/Post.js";
-import mongoose from "mongoose";
+import createNotification from "../utils/createNotification.js";
 
-// CREATE POST
+/* =======================
+   CREATE POST
+======================= */
 export const createPost = async (req, res) => {
   try {
-    const { content, photo } = req.body;
+    const { content } = req.body;
+    const photo = req.file ? req.file.path : "";
 
     if (!content && !photo) {
       return res
         .status(400)
-        .json({ message: "Post must have text or photo" });
+        .json({ message: "Post must have text or image" });
     }
 
     const post = await Post.create({
@@ -24,12 +27,20 @@ export const createPost = async (req, res) => {
   }
 };
 
-// GET ALL POSTS
+/* =======================
+   GET ALL POSTS (PAGINATED)
+======================= */
 export const getAllPosts = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const posts = await Post.find()
       .populate("user", "username email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.json(posts);
   } catch (error) {
@@ -37,7 +48,9 @@ export const getAllPosts = async (req, res) => {
   }
 };
 
-// LIKE / UNLIKE POST
+/* =======================
+   LIKE / UNLIKE POST
+======================= */
 export const likeUnlikePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -47,8 +60,6 @@ export const likeUnlikePost = async (req, res) => {
     }
 
     const userId = req.user._id;
-
-    // check if already liked
     const isLiked = post.likes.includes(userId);
 
     if (isLiked) {
@@ -59,6 +70,14 @@ export const likeUnlikePost = async (req, res) => {
     } else {
       // LIKE
       post.likes.push(userId);
+
+      // 🔔 Notify post owner (no self-notification)
+      await createNotification({
+        user: post.user,
+        sender: userId,
+        type: "like",
+        post: post._id
+      });
     }
 
     await post.save();
@@ -72,7 +91,9 @@ export const likeUnlikePost = async (req, res) => {
   }
 };
 
-// ADD COMMENT
+/* =======================
+   ADD COMMENT
+======================= */
 export const addComment = async (req, res) => {
   try {
     const { text } = req.body;
@@ -95,6 +116,14 @@ export const addComment = async (req, res) => {
     post.comments.push(comment);
     await post.save();
 
+    // 🔔 Notify post owner
+    await createNotification({
+      user: post.user,
+      sender: req.user._id,
+      type: "comment",
+      post: post._id
+    });
+
     res.status(201).json({
       message: "Comment added",
       comments: post.comments
@@ -104,12 +133,15 @@ export const addComment = async (req, res) => {
   }
 };
 
-
-// GET COMMENTS
+/* =======================
+   GET COMMENTS
+======================= */
 export const getPostComments = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
-      .populate("comments.user", "username email");
+    const post = await Post.findById(req.params.id).populate(
+      "comments.user",
+      "username email"
+    );
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -121,7 +153,9 @@ export const getPostComments = async (req, res) => {
   }
 };
 
-// DELETE COMMENT
+/* =======================
+   DELETE COMMENT (OWNER ONLY)
+======================= */
 export const deleteComment = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
@@ -132,7 +166,6 @@ export const deleteComment = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // find comment
     const commentIndex = post.comments.findIndex(
       (c) => c._id.toString() === commentId
     );
@@ -141,7 +174,6 @@ export const deleteComment = async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    // authorization: only comment owner
     if (
       post.comments[commentIndex].user.toString() !==
       req.user._id.toString()
@@ -149,9 +181,7 @@ export const deleteComment = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // remove comment
     post.comments.splice(commentIndex, 1);
-
     await post.save();
 
     res.json({ message: "Comment deleted successfully" });
@@ -160,7 +190,9 @@ export const deleteComment = async (req, res) => {
   }
 };
 
-// DELETE POST (OWNER ONLY)
+/* =======================
+   DELETE POST (OWNER ONLY)
+======================= */
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -169,7 +201,6 @@ export const deletePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // authorization: only owner
     if (post.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized" });
     }
@@ -182,8 +213,9 @@ export const deletePost = async (req, res) => {
   }
 };
 
-
-// UPDATE POST (OWNER ONLY)
+/* =======================
+   UPDATE POST (OWNER ONLY)
+======================= */
 export const updatePost = async (req, res) => {
   try {
     const { content, photo } = req.body;
@@ -194,7 +226,6 @@ export const updatePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // authorization: only owner
     if (post.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized" });
     }
@@ -210,20 +241,34 @@ export const updatePost = async (req, res) => {
   }
 };
 
-
-// GET PERSONALIZED FEED
+/* =======================
+   GET PERSONALIZED FEED
+======================= */
 export const getFeed = async (req, res) => {
   try {
-    // include own posts + followed users posts
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
     const userIds = [...req.user.following, req.user._id];
 
-    const posts = await Post.find({
-      user: { $in: userIds }
-    })
+    const posts = await Post.find({ user: { $in: userIds } })
       .populate("user", "username email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    res.json(posts);
+    const totalPosts = await Post.countDocuments({
+      user: { $in: userIds }
+    });
+
+    res.json({
+      page,
+      limit,
+      totalPosts,
+      totalPages: Math.ceil(totalPosts / limit),
+      posts
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
