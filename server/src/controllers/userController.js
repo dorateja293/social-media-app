@@ -1,4 +1,46 @@
 import User from "../models/user.js";
+import Post from "../models/Post.js";
+
+// GET USER BY ID
+export const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .populate("followers", "username email")
+      .populate("following", "username email");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// SEARCH USERS
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } }
+      ]
+    })
+      .select("username email")
+      .limit(10);
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // FOLLOW USER
 export const followUser = async (req, res) => {
@@ -14,7 +56,12 @@ export const followUser = async (req, res) => {
       return res.status(400).json({ message: "You cannot follow yourself" });
     }
 
-    if (!currentUser.following.includes(req.params.id)) {
+    // Properly check if already following using ObjectId comparison
+    const isFollowing = currentUser.following.some(
+      (id) => id.toString() === req.params.id
+    );
+
+    if (!isFollowing) {
       currentUser.following.push(req.params.id);
       userToFollow.followers.push(req.user._id);
 
@@ -38,6 +85,15 @@ export const unfollowUser = async (req, res) => {
 
     if (!userToUnfollow) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if actually following
+    const isFollowing = currentUser.following.some(
+      (id) => id.toString() === req.params.id
+    );
+
+    if (!isFollowing) {
+      return res.status(400).json({ message: "You are not following this user" });
     }
 
     currentUser.following = currentUser.following.filter(

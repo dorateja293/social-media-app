@@ -5,7 +5,7 @@ import { likeUnlikePost } from "../controllers/postController.js";
 import { addComment, getPostComments } from "../controllers/postController.js";
 import { deleteComment } from "../controllers/postController.js";
 import { deletePost, updatePost } from "../controllers/postController.js";
-import { getFeed } from "../controllers/postController.js";
+import { getFeed, getUserPosts } from "../controllers/postController.js";
 import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
@@ -13,6 +13,7 @@ const router = express.Router();
 router.get("/feed", protect, getFeed);
 router.post("/", protect, upload.single("photo"), createPost);
 router.get("/", getAllPosts);
+router.get("/user/:userId", protect, getUserPosts);
 router.put("/:id/like", protect, likeUnlikePost);
 router.post("/:id/comment", protect, addComment);
 router.get("/:id/comments", getPostComments);
