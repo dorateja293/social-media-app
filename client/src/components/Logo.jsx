@@ -16,7 +16,7 @@ const Logo = ({ size = "md", showText = true, className = "" }) => {
   };
 
   const logoContent = (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`inline-flex items-center gap-0 ${className}`}>
       <img
         src="/logo.png"
         alt="SocialStack Logo"
@@ -33,7 +33,7 @@ const Logo = ({ size = "md", showText = true, className = "" }) => {
       />
       {showText && (
         <span
-          className={`${textSizes[size]} font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}
+          className={`${textSizes[size]} font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent -ml-1 tracking-tight`}
         >
           SocialStack
         </span>
@@ -42,7 +42,7 @@ const Logo = ({ size = "md", showText = true, className = "" }) => {
   );
 
   return showText ? (
-    <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition">
+    <Link to="/" className="inline-flex items-center gap-0 hover:opacity-80 transition">
       {logoContent}
     </Link>
   ) : (

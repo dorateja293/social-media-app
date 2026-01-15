@@ -46,21 +46,21 @@ const CreatePost = ({ onPostCreated }) => {
   return (
     <form
       onSubmit={submit}
-      className="bg-white/80 backdrop-blur-sm p-6 shadow-xl rounded-2xl mb-6 border border-white/20 hover:shadow-2xl transition-all"
+      className="bg-gray-900 px-4 py-3 rounded-2xl mb-4 border border-gray-800 shadow-lg max-w-[480px] mx-auto"
     >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-100 font-bold">
           ✎
         </div>
-        <h3 className="text-xl font-bold text-gray-900">Create Post</h3>
+        <h3 className="text-xl font-bold text-gray-100">Create Post</h3>
       </div>
       
       <textarea
-        className="w-full border-2 border-gray-200 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
+        className="w-full bg-gray-950 border border-gray-800 px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none transition-all text-gray-100 placeholder:text-gray-500 text-sm"
         placeholder="What's on your mind?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        rows={4}
+        rows={3}
       />
       
       {preview && (
@@ -83,10 +83,10 @@ const CreatePost = ({ onPostCreated }) => {
         </div>
       )}
       
-      <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200">
-        <label className="flex items-center gap-2 text-gray-600 hover:text-blue-600 cursor-pointer transition-all px-4 py-2 rounded-lg hover:bg-blue-50">
+      <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-800">
+        <label className="flex items-center gap-2 text-gray-300 hover:text-gray-100 cursor-pointer transition-all px-4 py-2 rounded-lg hover:bg-gray-800">
           <FaImage className="text-xl" />
-          <span className="font-medium">Add Photo</span>
+          <span className="font-medium text-sm">Add Photo</span>
           <input
             type="file"
             accept="image/*"
@@ -97,7 +97,7 @@ const CreatePost = ({ onPostCreated }) => {
         <button
           type="submit"
           disabled={loading || (!content.trim() && !photo)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl flex items-center gap-2 font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+          className="bg-gray-100 text-black px-6 py-2 rounded-xl flex items-center gap-2 text-sm font-semibold hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <FaPaperPlane /> {loading ? "Posting..." : "Post"}
         </button>

@@ -7,7 +7,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
+  background-color: #000000;
 }
 
 * {
@@ -17,12 +17,12 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-}
+  }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-}
+  }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;

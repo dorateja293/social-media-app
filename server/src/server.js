@@ -9,6 +9,24 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'MONGO_URI',
+  'JWT_SECRET',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET'
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(envVar => console.error(`  - ${envVar}`));
+  console.error('\nPlease create a .env file based on .env.example');
+  process.exit(1);
+}
+
 const app = express();
 
 // middleware

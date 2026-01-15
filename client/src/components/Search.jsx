@@ -62,12 +62,12 @@ const Search = () => {
         value={query}
         onChange={handleSearch}
         onFocus={() => query && setShowResults(true)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full px-4 py-2 rounded-full bg-gray-900 border border-gray-700 text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
       />
       {showResults && results.length > 0 && (
         <div
           ref={resultsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50"
+          className="absolute top-full left-0 right-0 mt-1 bg-gray-950 border border-gray-800 rounded-xl shadow-lg max-h-64 overflow-y-auto z-50"
         >
           {results.map((user) => (
             <div
@@ -76,9 +76,9 @@ const Search = () => {
                 e.preventDefault(); // Prevent input blur
                 handleUserClick(user._id);
               }}
-              className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition"
+              className="px-4 py-3 hover:bg-gray-900 cursor-pointer transition"
             >
-              <div className="font-medium text-gray-900">{user.username}</div>
+              <div className="font-medium text-gray-100">{user.username}</div>
               <div className="text-sm text-gray-500">{user.email}</div>
             </div>
           ))}
@@ -87,7 +87,7 @@ const Search = () => {
       {showResults && query && results.length === 0 && (
         <div
           ref={resultsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+          className="absolute top-full left-0 right-0 mt-1 bg-gray-950 border border-gray-800 rounded-xl shadow-lg p-4 z-50"
         >
           <div className="text-gray-500 text-center">No users found</div>
         </div>

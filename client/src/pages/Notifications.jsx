@@ -46,13 +46,13 @@ const Notifications = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-100">
         <div className="text-center">
-          <div className="flex justify-center mb-6 animate-bounce-subtle">
-            <Logo size="xl" showText={true} />
+          <div className="flex justify-center mb-2 animate-bounce-subtle">
+            <Logo size="md" showText={true} />
           </div>
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
-          <p className="mt-6 text-gray-600 text-lg font-medium">Loading notifications...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-600"></div>
+          <p className="mt-3 text-gray-500 text-xs font-medium">Loading notifications...</p>
         </div>
       </div>
     );
@@ -61,17 +61,17 @@ const Notifications = () => {
   const unreadCount = data.filter(n => !n.isRead).length;
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12 bg-black text-gray-100">
       <div className="max-w-2xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8 animate-slide-up">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg">
-              <FaBell className="text-xl" />
+            <div className="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-100 bg-gray-900">
+              <FaBell className="text-lg" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Notifications</h2>
+              <h2 className="text-2xl font-semibold text-gray-100">Notifications</h2>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-600">{unreadCount} unread</p>
+                <p className="text-xs text-gray-400">{unreadCount} unread</p>
               )}
             </div>
           </div>
@@ -85,7 +85,7 @@ const Notifications = () => {
                   console.error("Error marking all as read:", err);
                 }
               }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+              className="bg-gray-100 hover:bg-white text-black px-4 py-2 rounded-xl text-xs font-medium"
             >
               Mark all as read
             </button>
@@ -93,32 +93,25 @@ const Notifications = () => {
         </div>
 
         {data.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm p-12 shadow-xl rounded-2xl text-center border border-white/20 animate-fade-in">
-            <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-bounce-subtle">
-                <FaBell className="text-white text-3xl" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">All caught up!</h3>
-            <p className="text-gray-600 text-lg">No notifications yet</p>
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center animate-fade-in">
+            <h3 className="text-lg font-semibold text-gray-100 mb-1">All caught up</h3>
+            <p className="text-gray-400 text-xs">You don't have any new notifications right now.</p>
           </div>
         ) : (
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-3 animate-fade-in">
             {data.map((n, index) => (
               <div
                 key={n._id}
-                className={`bg-white/80 backdrop-blur-sm p-5 shadow-xl rounded-2xl border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl ${
-                  n.isRead
-                    ? "opacity-75 border-gray-200"
-                    : "border-blue-300 bg-gradient-to-r from-blue-50/50 to-purple-50/50"
-                }`}
+                className={`bg-gray-900 p-4 shadow-md rounded-xl border border-gray-800 transition-all duration-300 ${
+                  n.isRead ? "opacity-70" : ""}
+              `}
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="flex items-start gap-4">
                   <div className={`mt-1 p-3 rounded-full ${
                     n.type === "like" 
-                      ? "bg-red-100 text-red-600" 
-                      : "bg-blue-100 text-blue-600"
+                      ? "bg-gray-800 text-red-400" 
+                      : "bg-gray-800 text-gray-200"
                   }`}>
                     {n.type === "like" ? (
                       <FaHeart className="text-xl" />
@@ -127,33 +120,33 @@ const Notifications = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-gray-800 text-base">
+                    <p className="text-gray-100 text-base">
                       <Link
                         to={`/profile/${n.sender?._id}`}
-                        className="font-bold text-blue-600 hover:text-purple-600 transition"
+                        className="font-bold text-gray-100 hover:text-white transition"
                       >
                         {n.sender?.username || "Someone"}
                       </Link>{" "}
-                      <span className="text-gray-600">
+                      <span className="text-gray-400">
                         {n.type === "like" ? "liked" : "commented on"} your post
                       </span>
                     </p>
                     {n.post && (
                       <Link
                         to="/"
-                        className="text-sm text-blue-600 hover:text-purple-600 mt-2 inline-block font-medium"
+                        className="text-sm text-gray-300 hover:text-white mt-2 inline-block font-medium"
                       >
                         View post →
                       </Link>
                     )}
-                    <div className="text-xs text-gray-400 mt-2">
+                    <div className="text-xs text-gray-500 mt-2">
                       {formatTimeAgo(n.createdAt)}
                     </div>
                   </div>
                   {!n.isRead && (
                     <button
                       onClick={() => markAsRead(n._id)}
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2 rounded-lg transition-all"
+                      className="text-gray-300 hover:text-white p-2 rounded-lg transition-all"
                       title="Mark as read"
                     >
                       <FaCheck />

@@ -27,7 +27,7 @@ const Feed = () => {
       const res = await API.get("/auth/me");
       setCurrentUser(res.data);
     } catch (err) {
-      console.error("Error fetching current user");
+      console.error("Error fetching current user", err);
     }
   };
 
@@ -48,87 +48,80 @@ const Feed = () => {
     return postDate.toLocaleDateString();
   };
 
-  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="flex justify-center mb-6 animate-bounce-subtle">
-            <Logo size="xl" showText={true} />
-          </div>
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
-          <p className="mt-6 text-gray-600 text-lg font-medium">Loading your feed...</p>
-        </div>
-      </div>
-    );
-  }
+    <div className="min-h-screen bg-neutral-900 text-gray-100 pb-12">
+      <div className="max-w-5xl mx-auto pt-4 px-2 sm:px-4">
 
-  return (
-    <div className="min-h-screen pb-12">
-      <div className="max-w-2xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
-        <div className="animate-slide-up">
-          <CreatePost onPostCreated={fetchFeed} />
+        {/* Create post composer removed from home feed */}
 
-          {posts.length === 0 ? (
-            <div className="bg-white/80 backdrop-blur-sm p-12 shadow-xl rounded-2xl text-center border border-white/20 animate-fade-in">
-              <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-bounce-subtle">
-                  <Logo size="lg" showText={false} />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-600 mb-6">Start following people to see their posts in your feed!</p>
-              <Link
-                to="/"
-                className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
-              >
-                Discover Users
-              </Link>
+        {/* Loading state over post list */}
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <div className="flex flex-col items-center gap-2">
+              <Logo size="sm" showText={true} />
+              <div className="w-5 h-5 border-2 border-gray-700 border-t-white rounded-full animate-spin" />
+              <p className="text-[11px] text-gray-500">Loading your feed...</p>
             </div>
-          ) : (
-            <div className="space-y-6 animate-fade-in">
-              {posts.map((post, index) => (
-                <div
-                  key={post._id}
-                  className="bg-white/80 backdrop-blur-sm p-6 shadow-xl rounded-2xl border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="flex items-center gap-4 mb-4">
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-gray-800 bg-gray-950 p-8 text-center">
+            <p className="text-base text-gray-200 mb-1">No posts yet</p>
+            <p className="text-xs text-gray-500">
+              Be the first to share something.
+            </p>
+          </div>
+        ) : (
+          <main className="space-y-6 mt-2">
+            {posts.map((post) => (
+              <article
+                key={post._id}
+                className="rounded-2xl border border-gray-900 bg-black overflow-hidden max-w-[480px] mx-auto"
+              >
+                {/* Header like Instagram */}
+                <div className="flex items-center justify-between px-3 pt-3 pb-2">
+                  <div className="flex items-center gap-3">
                     <Link to={`/profile/${post.user._id}`}>
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg hover:scale-110 transition-transform">
+                      <div className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-sm font-semibold text-gray-100">
                         {post.user?.username?.charAt(0).toUpperCase() || "U"}
                       </div>
                     </Link>
-                    <div className="flex-1">
-                      <Link
-                        to={`/profile/${post.user._id}`}
-                        className="font-bold text-gray-900 hover:text-blue-600 transition block text-lg"
-                      >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold">
                         {post.user?.username || "Unknown"}
-                      </Link>
-                      <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
-                        <FaClock className="text-xs" />
-                        <span>{formatTimeAgo(post.createdAt)}</span>
-                      </div>
+                      </span>
+                      <span className="text-[11px] text-gray-500">
+                        {formatTimeAgo(post.createdAt)}
+                      </span>
                     </div>
                   </div>
+                  <button className="text-gray-500 text-xl leading-none">⋯</button>
+                </div>
 
-                  {post.content && (
-                    <p className="text-gray-800 mb-4 whitespace-pre-wrap text-base leading-relaxed">
+                {/* Caption above media (no username prefix) */}
+                {post.content && (
+                  <div className="px-3 pt-2 pb-2">
+                    <p className="text-sm text-gray-100 whitespace-pre-wrap">
                       {post.content}
                     </p>
-                  )}
+                  </div>
+                )}
 
-                  {post.photo && (
-                    <div className="mb-4 rounded-xl overflow-hidden shadow-lg">
+                {/* Media box - square like IG */}
+                {post.photo && (
+                  <div className="bg-black flex justify-center">
+                    <div className="w-full aspect-square max-w-[480px] flex items-center justify-center bg-black">
                       <img
                         src={post.photo}
                         alt="Post"
-                        className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain"
                       />
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <div className="flex gap-6 items-center pt-4 border-t border-gray-200">
+                {/* Actions row icons (like + comment) */}
+                <div className="px-3 pt-3 flex items-center justify-between text-xl text-gray-200">
+                  <div className="flex items-center gap-5">
                     <button
                       onClick={async () => {
                         try {
@@ -138,88 +131,105 @@ const Feed = () => {
                           console.error("Error liking post:", err);
                         }
                       }}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all transform hover:scale-110 ${
-                        post.likes?.some(
-                          (like) => {
-                            const likeId = typeof like === 'object' ? (like._id || like) : like;
-                            return likeId?.toString() === currentUser?._id?.toString();
-                          }
-                        )
-                          ? "text-red-600 bg-red-50"
-                          : "text-gray-600 hover:text-red-600 hover:bg-red-50"
-                      }`}
+                      className={
+                        post.likes?.some((like) => {
+                          const likeId =
+                            typeof like === "object" ? like._id || like : like;
+                          return (
+                            likeId?.toString() === currentUser?._id?.toString()
+                          );
+                        })
+                          ? "text-red-400"
+                          : "text-gray-200 hover:text-red-400"
+                      }
                     >
                       <FaHeart
                         className={
-                          post.likes?.some(
-                            (like) => {
-                              const likeId = typeof like === 'object' ? (like._id || like) : like;
-                              return likeId?.toString() === currentUser?._id?.toString();
-                            }
-                          )
-                            ? "fill-current animate-bounce-subtle"
+                          post.likes?.some((like) => {
+                            const likeId =
+                              typeof like === "object" ? like._id || like : like;
+                            return (
+                              likeId?.toString() === currentUser?._id?.toString()
+                            );
+                          })
+                            ? "fill-current"
                             : ""
                         }
                       />
-                      <span className="font-medium">{post.likes?.length || 0}</span>
                     </button>
-
-                    <div className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all">
+                    <button className="text-gray-200 hover:text-gray-100">
                       <FaComment />
-                      <span className="font-medium">{post.comments?.length || 0}</span>
-                    </div>
-
-                    {currentUser && currentUser._id === post.user._id && (
-                      <div className="ml-auto flex gap-2">
-                        <button
-                          onClick={async () => {
-                            const newContent = prompt("Edit post:", post.content);
-                            if (newContent && newContent.trim()) {
-                              try {
-                                await API.put(`/posts/${post._id}`, { content: newContent });
-                                fetchFeed();
-                              } catch (err) {
-                                console.error("Error updating post:", err);
-                                alert("Failed to update post");
-                              }
-                            }
-                          }}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-all"
-                          title="Edit post"
-                        >
-                          <FaEdit />
-                        </button>
-
-                        <button
-                          onClick={async () => {
-                            if (window.confirm("Are you sure you want to delete this post?")) {
-                              try {
-                                await API.delete(`/posts/${post._id}`);
-                                fetchFeed();
-                              } catch (err) {
-                                console.error("Error deleting post:", err);
-                                alert("Failed to delete post");
-                              }
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all"
-                          title="Delete post"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    )}
+                    </button>
                   </div>
 
+                  {currentUser && currentUser._id === post.user._id && (
+                    <div className="flex gap-3 text-base">
+                      <button
+                        onClick={async () => {
+                          const newContent = prompt("Edit post:", post.content);
+                          if (newContent && newContent.trim()) {
+                            try {
+                              await API.put(`/posts/${post._id}`, {
+                                content: newContent,
+                              });
+                              fetchFeed();
+                            } catch (err) {
+                              console.error("Error updating post:", err);
+                              alert("Failed to update post");
+                            }
+                          }
+                        }}
+                        className="text-gray-400 hover:text-gray-200"
+                        title="Edit post"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to delete this post?"
+                            )
+                          ) {
+                            try {
+                              await API.delete(`/posts/${post._id}`);
+                              fetchFeed();
+                            } catch (err) {
+                              console.error("Error deleting post:", err);
+                              alert("Failed to delete post");
+                            }
+                          }
+                        }}
+                        className="text-gray-400 hover:text-red-400"
+                        title="Delete post"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Likes + meta */}
+                <div className="px-3 pt-2 pb-3 text-sm">
+                  <p className="font-semibold text-gray-100">
+                    {(post.likes?.length || 0).toLocaleString()} likes
+                  </p>
+
+                  <button className="mt-1 text-[13px] text-gray-500">
+                    View all {post.comments?.length || 0} comments
+                  </button>
+                </div>
+
+                {/* Full comments thread (existing component) */}
+                <div className="px-3 pb-4">
                   <Comments postId={post._id} />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </article>
+            ))}
+          </main>
+        )}
       </div>
     </div>
   );
 };
-
 export default Feed;

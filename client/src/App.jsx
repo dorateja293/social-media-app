@@ -14,7 +14,7 @@ const App = () => {
   
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-black text-gray-100">
         <Navbar />
         <main className="flex-grow">
           <Routes>
@@ -49,7 +49,8 @@ const App = () => {
             />
           </Routes>
         </main>
-        {token && <Footer />}
+        {/* Show footer only when user is authenticated and not on auth routes */}
+        {token && window.location.pathname !== "/login" && window.location.pathname !== "/register" && <Footer />}
       </div>
     </BrowserRouter>
   );

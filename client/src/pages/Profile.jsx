@@ -4,6 +4,7 @@ import API from "../api/axios";
 import { FaUserPlus, FaUserMinus, FaHeart, FaComment, FaClock } from "react-icons/fa";
 import Comments from "../components/Comments";
 import Logo from "../components/Logo";
+import CreatePost from "../components/CreatePost";
 
 const Profile = () => {
   const { id } = useParams();
@@ -47,17 +48,28 @@ const Profile = () => {
       if (isFollowing) {
         await API.put(`/users/${id}/unfollow`);
         setIsFollowing(false);
-        const userRes = await API.get(`/users/${id}`);
-        setUser(userRes.data);
+        // Optimistically update UI
+        setUser(prev => ({
+          ...prev,
+          followers: prev.followers.filter(f => {
+            const fId = typeof f === 'object' ? f._id : f;
+            return fId !== currentUser._id;
+          })
+        }));
       } else {
         await API.put(`/users/${id}/follow`);
         setIsFollowing(true);
-        const userRes = await API.get(`/users/${id}`);
-        setUser(userRes.data);
+        // Optimistically update UI
+        setUser(prev => ({
+          ...prev,
+          followers: [...prev.followers, currentUser._id]
+        }));
       }
     } catch (err) {
       console.error("Error following/unfollowing:", err);
       alert(err.response?.data?.message || "Failed to follow/unfollow user");
+      // Revert on error
+      setIsFollowing(!isFollowing);
     }
   };
 
@@ -75,13 +87,13 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-100">
         <div className="text-center">
-          <div className="flex justify-center mb-6 animate-bounce-subtle">
-            <Logo size="xl" showText={true} />
+          <div className="flex justify-center mb-2 animate-bounce-subtle">
+            <Logo size="md" showText={true} />
           </div>
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
-          <p className="mt-6 text-gray-600 text-lg font-medium">Loading profile...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-600"></div>
+          <p className="mt-3 text-gray-500 text-xs font-medium">Loading profile...</p>
         </div>
       </div>
     );
@@ -89,10 +101,10 @@ const Profile = () => {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl text-center border border-white/20">
-          <div className="text-red-500 text-xl font-semibold mb-2">{error || "User not found"}</div>
-          <Link to="/" className="text-blue-600 hover:text-purple-600 font-medium">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-100">
+        <div className="bg-gray-900 p-8 rounded-2xl shadow-xl text-center border border-gray-800">
+          <div className="text-red-400 text-xl font-semibold mb-2">{error || "User not found"}</div>
+          <Link to="/" className="text-gray-300 hover:text-white font-medium">
             Go back to feed
           </Link>
         </div>
@@ -103,44 +115,44 @@ const Profile = () => {
   const isOwnProfile = currentUser && currentUser._id === id;
 
   return (
-    <div className="min-h-screen pb-12">
-      <div className="max-w-4xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <div className="bg-white/80 backdrop-blur-sm p-8 shadow-xl rounded-2xl mb-8 border border-white/20 animate-slide-up">
+    <div className="min-h-screen pb-12 bg-black text-gray-100">
+      <div className="max-w-5xl mx-auto pt-6 px-3 sm:px-6 lg:px-8 flex flex-col items-center gap-6">
+        {/* Profile Header - flat on dark background */}
+        <div className="px-1 sm:px-0 max-w-[480px] w-full animate-slide-up">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <div className="w-32 h-32 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-5xl font-bold shadow-2xl transform hover:scale-105 transition-transform">
+            <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center text-gray-100 text-4xl font-bold">
               {user.username.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">{user.username}</h2>
-              <p className="text-gray-600 mb-6 text-lg">{user.email}</p>
-              <div className="flex gap-8 mb-6">
+              <h2 className="text-2xl font-bold text-gray-100 mb-1">{user.username}</h2>
+              <p className="text-gray-400 mb-4 text-sm">{user.email}</p>
+              <div className="flex gap-8 mb-3 text-sm">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <div className="text-xl font-bold text-gray-100">
                     {user.followers?.length || 0}
                   </div>
-                  <div className="text-gray-600 text-sm">Followers</div>
+                  <div className="text-gray-400 text-sm">Followers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <div className="text-xl font-bold text-gray-100">
                     {user.following?.length || 0}
                   </div>
-                  <div className="text-gray-600 text-sm">Following</div>
+                  <div className="text-gray-400 text-sm">Following</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-blue-600 bg-clip-text text-transparent">
+                  <div className="text-xl font-bold text-gray-100">
                     {posts.length}
                   </div>
-                  <div className="text-gray-600 text-sm">Posts</div>
+                  <div className="text-gray-400 text-sm">Posts</div>
                 </div>
               </div>
               {!isOwnProfile && (
                 <button
                   onClick={handleFollow}
-                  className={`px-8 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 ${
+                  className={`px-6 py-2 rounded-xl font-semibold flex items-center gap-2 ${
                     isFollowing
-                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                      ? "bg-gray-800 text-gray-100 hover:bg-gray-700"
+                      : "bg-gray-100 text-black hover:bg-white"
                   }`}
                 >
                   {isFollowing ? (
@@ -158,89 +170,120 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Posts Section */}
-        <h3 className="text-3xl font-bold mb-6 text-gray-900">Posts</h3>
+        {/* Create Post (only on profile page) */}
+        <div className="w-full max-w-[480px]">
+          <CreatePost onPostCreated={async () => {
+            const postsRes = await API.get(`/posts/user/${id}`);
+            setPosts(postsRes.data.posts || postsRes.data);
+          }} />
+        </div>
+
+        {/* Posts Section - same style as feed */}
+        <h3 className="text-2xl font-semibold mb-4 text-gray-100 text-center w-full">Your Posts</h3>
         {posts.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm p-12 shadow-xl rounded-2xl text-center border border-white/20 animate-fade-in">
-            <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-bounce-subtle">
-                <Logo size="lg" showText={false} />
-              </div>
-            </div>
-            <p className="text-xl text-gray-600">No posts yet</p>
+          <div className="bg-gray-900 px-6 py-6 shadow-xl rounded-2xl text-center border border-gray-800 animate-fade-in max-w-[480px] mx-auto">
+            <p className="text-base text-gray-300">No posts yet</p>
           </div>
         ) : (
           <div className="space-y-6 animate-fade-in">
-            {posts.map((post, index) => (
-              <div
+            {posts.map((post) => (
+              <article
                 key={post._id}
-                className="bg-white/80 backdrop-blur-sm p-6 shadow-xl rounded-2xl border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="rounded-2xl border border-gray-900 bg-black overflow-hidden max-w-[480px] mx-auto"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {post.user?.username?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                  <div className="flex-1">
-                    <Link
-                      to={`/profile/${post.user._id}`}
-                      className="font-bold text-gray-900 hover:text-blue-600 transition block text-lg"
-                    >
-                      {post.user?.username || "Unknown"}
-                    </Link>
-                    <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
-                      <FaClock className="text-xs" />
-                      <span>{formatTimeAgo(post.createdAt)}</span>
+                {/* Header like feed */}
+                <div className="flex items-center justify-between px-3 pt-3 pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-sm font-semibold text-gray-100">
+                      {post.user?.username?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold">
+                        {post.user?.username || "Unknown"}
+                      </span>
+                      <span className="text-[11px] text-gray-500">
+                        {formatTimeAgo(post.createdAt)}
+                      </span>
                     </div>
                   </div>
                 </div>
+
+                {/* Caption above media */}
                 {post.content && (
-                  <p className="text-gray-800 mb-4 text-base leading-relaxed">{post.content}</p>
-                )}
-                {post.photo && (
-                  <div className="mb-4 rounded-xl overflow-hidden shadow-lg">
-                    <img
-                      src={post.photo}
-                      alt="Post"
-                      className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-500"
-                    />
+                  <div className="px-3 pt-2 pb-2">
+                    <p className="text-sm text-gray-100 whitespace-pre-wrap">{post.content}</p>
                   </div>
                 )}
-                <div className="mt-4 flex gap-6 items-center pt-4 border-t border-gray-200">
-                  <button
-                    onClick={async () => {
-                      await API.put(`/posts/${post._id}/like`);
-                      const postsRes = await API.get(`/posts/user/${id}`);
-                      setPosts(postsRes.data.posts || postsRes.data);
-                    }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all transform hover:scale-110 ${
-                      post.likes?.some(like => {
-                        const likeId = typeof like === 'object' ? (like._id || like) : like;
-                        return likeId?.toString() === currentUser?._id?.toString();
-                      })
-                        ? "text-red-600 bg-red-50"
-                        : "text-gray-600 hover:text-red-600 hover:bg-red-50"
-                    }`}
-                  >
-                    <FaHeart
+
+                {/* Media box - square like feed */}
+                {post.photo && (
+                  <div className="bg-black flex justify-center">
+                    <div className="w-full aspect-square max-w-[480px] flex items-center justify-center bg-black">
+                      <img
+                        src={post.photo}
+                        alt="Post"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions row (like + comment) */}
+                <div className="px-3 pt-3 flex items-center justify-between text-xl text-gray-200">
+                  <div className="flex items-center gap-5">
+                    <button
+                      onClick={async () => {
+                        await API.put(`/posts/${post._id}/like`);
+                        const postsRes = await API.get(`/posts/user/${id}`);
+                        setPosts(postsRes.data.posts || postsRes.data);
+                      }}
                       className={
-                        post.likes?.some(like => {
-                          const likeId = typeof like === 'object' ? (like._id || like) : like;
-                          return likeId?.toString() === currentUser?._id?.toString();
+                        post.likes?.some((like) => {
+                          const likeId =
+                            typeof like === "object" ? like._id || like : like;
+                          return (
+                            likeId?.toString() === currentUser?._id?.toString()
+                          );
                         })
-                          ? "fill-current animate-bounce-subtle"
-                          : ""
+                          ? "text-red-400"
+                          : "text-gray-200 hover:text-red-400"
                       }
-                    />
-                    <span className="font-medium">{post.likes?.length || 0}</span>
-                  </button>
-                  <div className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all">
-                    <FaComment />
-                    <span className="font-medium">{post.comments?.length || 0}</span>
+                    >
+                      <FaHeart
+                        className={
+                          post.likes?.some((like) => {
+                            const likeId =
+                              typeof like === "object" ? like._id || like : like;
+                            return (
+                              likeId?.toString() === currentUser?._id?.toString()
+                            );
+                          })
+                            ? "fill-current"
+                            : ""
+                        }
+                      />
+                    </button>
+                    <button className="text-gray-200 hover:text-gray-100">
+                      <FaComment />
+                    </button>
                   </div>
                 </div>
-                <Comments postId={post._id} />
-              </div>
+
+                {/* Likes + meta */}
+                <div className="px-3 pt-2 pb-3 text-sm">
+                  <p className="font-semibold text-gray-100">
+                    {(post.likes?.length || 0).toLocaleString()} likes
+                  </p>
+                  <button className="mt-1 text-[13px] text-gray-500">
+                    View all {post.comments?.length || 0} comments
+                  </button>
+                </div>
+
+                {/* Comments thread */}
+                <div className="px-3 pb-4">
+                  <Comments postId={post._id} />
+                </div>
+              </article>
             ))}
           </div>
         )}

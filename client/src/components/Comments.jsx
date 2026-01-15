@@ -24,7 +24,7 @@ const Comments = ({ postId }) => {
         const res = await API.get("/auth/me");
         setCurrentUser(res.data);
       } catch (err) {
-        console.error("Error fetching user");
+        console.error("Error fetching user", err);
       }
     };
     fetchUser();
@@ -68,56 +68,58 @@ const Comments = ({ postId }) => {
   };
 
   return (
-    <div className="mt-5 pt-5 border-t border-gray-200">
-      <form onSubmit={add} className="mb-4">
+    <div className="mt-4 pt-4 border-t border-gray-900">
+      <form onSubmit={add} className="mb-2">
         <div className="flex gap-2">
           <input
-            className="flex-1 border-2 border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder="Write a comment..."
+            className="flex-1 bg-gray-900 border border-gray-800 p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all text-gray-100 placeholder:text-gray-500 text-sm"
+            placeholder="Add a comment..."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
           <button
             type="submit"
             disabled={loading || !text.trim()}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 font-medium"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-black text-xs font-semibold hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            <FaPaperPlane /> {loading ? "..." : "Post"}
+            <FaPaperPlane className="text-xs" /> {loading ? "Posting" : "Post"}
           </button>
         </div>
       </form>
 
       {comments.length > 0 && (
-        <div className="space-y-3 max-h-80 overflow-y-auto">
+        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
           {comments.map((c) => (
             <div
               key={c._id}
-              className="bg-gradient-to-r from-gray-50 to-blue-50/30 p-4 rounded-xl flex items-start justify-between gap-3 hover:shadow-md transition-all"
+              className="bg-gray-900 border border-gray-800 p-3 rounded-2xl flex items-start justify-between gap-3"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center text-[11px] font-semibold text-gray-100">
                     {c.user?.username?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <span className="font-semibold text-gray-900 text-sm">
+                  <span className="font-semibold text-gray-100 text-xs">
                     {c.user?.username || "Unknown"}
                   </span>
+                  <span className="text-[10px] text-gray-500">
+                    {formatTimeAgo(c.createdAt)}
+                  </span>
                 </div>
-                <p className="text-gray-700 text-sm ml-10 mb-1">{c.text}</p>
-                <div className="text-xs text-gray-400 ml-10">
-                  {formatTimeAgo(c.createdAt)}
-                </div>
+                <p className="text-gray-200 text-sm ml-9 break-words">{c.text}</p>
               </div>
-              {currentUser &&
-                (currentUser._id === c.user?._id || currentUser._id === c.user) && (
-                  <button
-                    onClick={() => deleteComment(c._id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all"
-                    title="Delete comment"
-                  >
-                    <FaTrash className="text-sm" />
-                  </button>
-                )}
+              {currentUser && (() => {
+                const commentUserId = typeof c.user === 'object' ? c.user?._id : c.user;
+                return commentUserId?.toString() === currentUser._id?.toString();
+              })() && (
+                <button
+                  onClick={() => deleteComment(c._id)}
+                  className="text-gray-500 hover:text-red-400 p-1.5 rounded-lg transition-all"
+                  title="Delete comment"
+                >
+                  <FaTrash className="text-xs" />
+                </button>
+              )}
             </div>
           ))}
         </div>
