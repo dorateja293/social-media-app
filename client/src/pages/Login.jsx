@@ -106,7 +106,7 @@ const Login = () => {
           {/* Right: illustration */}
           <div className="hidden md:block md:w-1/2 bg-gray-900 border-l border-gray-800">
             <img
-              src="https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="public/photo.avif"
               alt="Social media feed illustration"
               className="w-full h-full object-cover opacity-90"
             />

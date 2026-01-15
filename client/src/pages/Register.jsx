@@ -121,7 +121,7 @@ const Register = () => {
           {/* Right: illustration */}
           <div className="hidden md:block md:w-1/2 bg-gray-900 border-l border-gray-800">
             <img
-              src="https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="public/photo.avif"
               alt="People connecting on social media"
               className="w-full h-full object-cover opacity-90"
             />
